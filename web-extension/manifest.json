@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Stop, Elaborate, and Listen",
+  "version": "0.1",
+  "description": "Double-space to pause and ask your local AI for an explanation.",
+  "permissions": ["scripting", "activeTab"],
+  "host_permissions": ["http://localhost:8080/"],
+  "content_scripts": [
+    {
+      "matches": ["*://www.youtube.com/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "action": {
+    "default_title": "Stop, Elaborate, and Listen"
+  }
+}
