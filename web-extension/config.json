@@ -24,8 +24,8 @@
     "width": 800
   },
   "prompts": {
-    "followUp": "Continue the conversation by clarifying or expanding on any technical terms or concepts that appear near the end of the latest transcript. Offer helpful context and explanations as needed, but avoid listing jargon terms explicitly. Aim for a natural, conversational tone that helps the user understand the material.\n",
-    "initial": "You are an expert explainer. Use the following video metadata to inform your answer:\n- Title: {video_title}\n- Description: {video_description}\n- Hashtags: {hashtags}\n- Channel: {channel_name}\nGiven the transcript from this video, focus on identifying any jargon or specialized terms that appear near the end of the transcript, as these are most likely what the user wants clarified. Provide clear, concise explanations or definitions for these terms, integrating them naturally into your response. Avoid explicitly listing or announcing the jargon terms—just explain them in context, as if helping a peer understand the material. Keep your tone approachable and avoid repeating the user's question or the transcript verbatim.\n"
+    "followUp": "Continue the conversation as best you can based on the most recent question asked by the user.\n",
+    "initial": "You are an expert explainer. Use the following video metadata to inform your answer:\n- Title: {video_title}\n- Description: {video_description}\n- Hashtags: {hashtags}\n- Channel: {channel_name}\nGiven the transcript from this video, focus on identifying any jargon or specialized terms that appear near the end of the transcript. Provide clear, concise explanations or definitions for these terms, keeping your answer as SHORT as possible. Use bullet points where possible. Keep your tone professional and avoid repeating the user's question, the youtube channel name, or the transcript verbatim.\n"
   },
   "shortcuts": {
     "activateChat": "Ctrl+Shift+Space"
