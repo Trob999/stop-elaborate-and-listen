@@ -290,4 +290,32 @@ document.addEventListener("keydown", async e => {
   lastTap = now;
 });
 
+function enableYouTubeCaptions() {
+  let attempts = 0;
+  const maxAttempts = 20; // Try for up to 10 seconds
+
+  const interval = setInterval(() => {
+    const captionsBtn = document.querySelector('.ytp-subtitles-button');
+    const captionsSegment = document.querySelector('.ytp-caption-segment');
+
+    // If captions are showing, stop trying
+    if (captionsSegment) {
+      clearInterval(interval);
+      return;
+    }
+
+    // If button exists and captions are off, click it
+    if (captionsBtn && captionsBtn.getAttribute('aria-pressed') === 'false') {
+      captionsBtn.click();
+    }
+
+    // Stop after max attempts
+    if (++attempts > maxAttempts) {
+      clearInterval(interval);
+    }
+  }, 500);
+}
+
+enableYouTubeCaptions();
+
 trackCaptions();
