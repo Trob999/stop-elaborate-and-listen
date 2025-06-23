@@ -12,6 +12,9 @@ A browser extension + local AI backend that lets you double-tap the spacebar on 
 - **Some videos have closed captions fully disabled.**  
   **Solution:** Fallback to real-time transcription (e.g. Whisper).
 
+- **Responses don't handle inline code well**  
+  - *Current solution:* Inline code is now rendered with improved styling and a copy-to-clipboard button for long or multiline code snippets. Short inline code is styled for readability. This is handled in the extension's content script, but the feature is still a little buggy and may not always render perfectly.
+
 - **Stateless LLMs can’t remember previous context.**  
   - *Current solution:* The extension resends the full transcript and conversation history for each question.
   - *Proposed redesign:*  
