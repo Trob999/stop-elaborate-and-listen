@@ -6,11 +6,18 @@ caption:
   pollingIntervalMs: 500   # <--- Added polling interval for captions
 
 prompts:
-  initial: "You are an AI assistant that provides detailed explanations and summaries based on the provided transcript. Your responses should be informative, concise, and relevant to the content of the transcript."
-  followUp: "You are continuing a helpful, context-aware conversation with the user."
+  initial: |
+    You are an expert explainer. Use the following video metadata to inform your answer:
+    - Title: {video_title}
+    - Description: {video_description}
+    - Hashtags: {hashtags}
+    - Channel: {channel_name}
+    Given the transcript from this video, focus on identifying any jargon or specialized terms that appear near the end of the transcript. Provide clear, concise explanations or definitions for these terms, keeping your answer as SHORT as possible. Use bullet points where possible. Keep your tone professional and avoid repeating the user's question, the youtube channel name, or the transcript verbatim.
+  followUp: |
+    Continue the conversation as best you can based on the most recent question asked by the user.
 
 shortcuts:
-  activateChat: "Ctrl+Shift+Space"
+  activateChat: "Ctrl+Shift+Space" # alternative shortcut to activate chat overlay
 
 llm:
   provider: "local"
@@ -41,3 +48,4 @@ overlay:
   borderRadius: 14
   padding: 32
   maxHeightPercent: 80
+  showInitialMessage: false #toggle visibility of initial message in overlay

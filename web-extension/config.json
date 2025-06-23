@@ -20,11 +20,12 @@
     "borderRadius": 14,
     "maxHeightPercent": 80,
     "padding": 32,
+    "showInitialMessage": false,
     "width": 800
   },
   "prompts": {
-    "followUp": "You are continuing a helpful, context-aware conversation with the user.",
-    "initial": "You are an AI assistant that provides detailed explanations and summaries based on the provided transcript. Your responses should be informative, concise, and relevant to the content of the transcript."
+    "followUp": "Continue the conversation by clarifying or expanding on any technical terms or concepts that appear near the end of the latest transcript. Offer helpful context and explanations as needed, but avoid listing jargon terms explicitly. Aim for a natural, conversational tone that helps the user understand the material.\n",
+    "initial": "You are an expert explainer. Use the following video metadata to inform your answer:\n- Title: {video_title}\n- Description: {video_description}\n- Hashtags: {hashtags}\n- Channel: {channel_name}\nGiven the transcript from this video, focus on identifying any jargon or specialized terms that appear near the end of the transcript, as these are most likely what the user wants clarified. Provide clear, concise explanations or definitions for these terms, integrating them naturally into your response. Avoid explicitly listing or announcing the jargon terms—just explain them in context, as if helping a peer understand the material. Keep your tone approachable and avoid repeating the user's question or the transcript verbatim.\n"
   },
   "shortcuts": {
     "activateChat": "Ctrl+Shift+Space"

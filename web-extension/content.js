@@ -101,10 +101,65 @@ function main() {
     return `${format(startMs)} → ${format(endMs)}`;
   }
 
-  function sendToLLM(transcript) {
+  // --- Extract YouTube metadata ---
+  function getYouTubeMetadata() {
+    // Title
+    let title = document.title.replace(" - YouTube", "");
+    const h1 = document.querySelector('h1.title, h1.ytd-watch-metadata');
+    if (h1 && h1.textContent.trim()) title = h1.textContent.trim();
+
+    // Description
+    let description = "";
+    const descEl = document.querySelector('#description, #description-inline-expander, .ytd-video-secondary-info-renderer #description');
+    if (descEl) {
+      description = descEl.textContent.trim();
+    } else {
+      // Try meta tag as fallback
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc) description = metaDesc.getAttribute('content') || "";
+    }
+
+    // Hashtags (from description or above title)
+    let hashtags = [];
+    // Try above-title hashtags
+    document.querySelectorAll('a[href^="/hashtag/"]').forEach(a => {
+      if (a.textContent.startsWith('#')) hashtags.push(a.textContent.trim());
+    });
+    // Fallback: parse hashtags from description
+    if (hashtags.length === 0 && description) {
+      hashtags = (description.match(/#[\w-]+/g) || []);
+    }
+
+    // Channel name
+    let channel = "";
+    const channelEl = document.querySelector('ytd-channel-name a, #channel-name a, .ytd-channel-name a');
+    if (channelEl) channel = channelEl.textContent.trim();
+
+    return {
+      video_title: title,
+      video_description: description,
+      hashtags: hashtags.join(' '),
+      channel_name: channel
+    };
+  }
+
+  function sendToLLM(transcript, isInitial = true) {
+    let systemPrompt = extensionConfig.prompts?.initial || "";
+    let meta = {};
+
+    if (isInitial) {
+      meta = getYouTubeMetadata();
+      // Replace placeholders in the prompt with actual metadata
+      systemPrompt = systemPrompt
+        .replace("{video_title}", meta.video_title || "")
+        .replace("{video_description}", meta.video_description || "")
+        .replace("{hashtags}", meta.hashtags || "")
+        .replace("{channel_name}", meta.channel_name || "");
+    }
+
     const payload = {
       transcript: transcript,
-      systemPrompt: "", // Let backend use config.yaml default
+      systemPrompt: systemPrompt,
     };
 
     return fetch(
@@ -286,91 +341,39 @@ function main() {
       const bubble = document.createElement("div");
       bubble.classList.add("message", who);
 
-      // Basic Markdown-like formatting:
-      let html = text
-        // Multiline code blocks (```lang\ncode```
-        .replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
-          const encoded = code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-          return `<div class="multiline-code-block" style="position:relative;margin:12px 0;">
-            <pre style="background:#222;padding:12px 16px;border-radius:6px;overflow-x:auto;color:#fff;font-size:1em;">
-              <code>${encoded}</code>
-            </pre>
-            <button class="copy-multiline-code" title="Copy" style="position:absolute;top:8px;right:12px;padding:2px 8px;font-size:0.95em;cursor:pointer;border:none;border-radius:3px;background:#444;color:#fff;">📋</button>
-          </div>`;
-        })
-        // Inline code (`code`)
-        .replace(/`([^`]+)`/g, (match, code) => {
-          const encoded = code.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-          // Only show copy button/box if code is long or multiline
-          if (encoded.length > 20 || encoded.includes('\n')) {
-            return `
-      <span class="inline-code-wrapper" style="display:inline-block; position:relative; margin:0 2px;">
-        <code style="
-          background: #23272e;
-          color: #fff;
-          border-radius: 5px;
-          padding: 2px 24px 2px 6px;
-          font-size: 0.98em;
-          border: 1px solid #444;
-          font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
-          position: relative;
-        ">
-          ${encoded}
-        </code>
-        <button class="copy-inline-code" title="Copy" style="
-          position: absolute;
-          top: 2px;
-          right: 2px;
-          padding: 0 5px;
-          font-size: 0.95em;
-          cursor: pointer;
-          border: none;
-          border-radius: 3px;
-          background: #444;
-          color: #fff;
-          opacity: 0.7;
-          transition: opacity 0.2s;
-          z-index: 2;
-        ">📋</button>
-      </span>
-    `;
-          } else {
-            // Just style as inline code, no button/box
-            return `<code style="
-      background: #23272e;
-      color: #fff;
-      border-radius: 5px;
-      padding: 2px 6px;
-      font-size: 0.98em;
-      border: 1px solid #444;
-      font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
-    ">${encoded}</code>`;
-          }
-        })
-        // Bold (**text**)
-        .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
-        // Italic (*text*)
-        .replace(/(^|[^\*])\*([^\*\s][^*]*?)\*(?!\*)/g, '$1<i>$2</i>')
-        // Bullet points: * item or - item at line start
-        .replace(/^\s*[\*\-]\s+(.*)$/gm, '<li>$1</li>')
-        // Numbered lists: 1. item
-        .replace(/^\s*\d+\.\s+(.*)$/gm, '<li>$1</li>')
-        // Paragraphs: double newlines to <p>
-        .replace(/\n{2,}/g, "</p><p>")
-        // Single newline to <br>
-        .replace(/\n/g, "<br>");
-
-      // Wrap <li> items in <ul> if any exist
-      if (html.includes('<li>')) {
-        html = '<ul style="margin: 0 0 0 1.5em; padding: 0;">' + html + '</ul>';
-        // Remove extra <br> inside <ul>
-        html = html.replace(/<ul[^>]*>([\s\S]*?)<\/ul>/g, (m, inner) => {
-          return '<ul style="margin: 0 0 0 1.5em; padding: 0;">' + inner.replace(/<br>/g, '') + '</ul>';
-        });
-      } else {
-        // Wrap in <p> for normal text
-        html = '<p>' + html + '</p>';
+      // Simple Markdown replacements for bold and inline code
+      function md(text) {
+        // Bold: **text**
+        text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        // Inline code: `code`
+        text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
+        return text;
       }
+
+      // Split by lines for smarter list handling
+      const lines = text.split('\n');
+      let html = '';
+      let inList = false;
+
+      for (let line of lines) {
+        // Bullet or numbered list
+        if (/^\s*([\*\-]|\d+\.)\s+/.test(line)) {
+          if (!inList) {
+            html += '<ul style="margin: 0 0 0 1.5em; padding: 0;">';
+            inList = true;
+          }
+          // Remove bullet/number and wrap in <li>
+          html += `<li>${md(line.replace(/^\s*([\*\-]|\d+\.)\s+/, ''))}</li>`;
+        } else {
+          if (inList) {
+            html += '</ul>';
+            inList = false;
+          }
+          // Regular paragraph
+          if (line.trim()) html += `<p>${md(line)}</p>`;
+        }
+      }
+      if (inList) html += '</ul>';
 
       bubble.innerHTML = html;
       responseDiv.appendChild(bubble);
@@ -398,11 +401,13 @@ function main() {
       });
     }
 
-    // Show the system prompt as a blue, full-width banner
-    const systemBanner = document.createElement("div");
-    systemBanner.className = "system-banner";
-    systemBanner.innerText = transcript; // transcript is your full prompt
-    responseDiv.appendChild(systemBanner);
+    // Show the system prompt as a blue, full-width banner ONLY if enabled in config
+    if (extensionConfig.overlay?.showInitialMessage !== false) {
+      const systemBanner = document.createElement("div");
+      systemBanner.className = "system-banner";
+      systemBanner.innerText = transcript; // transcript is your full prompt
+      responseDiv.appendChild(systemBanner);
+    }
 
     // Show the assistant's reply (on the right)
     appendBubble(initialText, "assistant");
@@ -532,11 +537,16 @@ function main() {
             }
           }
 
-          // Use prompt from config for display
-          const systemPrompt = extensionConfig.prompts?.initial || "";
+          const meta = getYouTubeMetadata();
+          const systemPromptTemplate = extensionConfig.prompts?.initial || "";
+          const systemPrompt = systemPromptTemplate
+            .replace("{video_title}", meta.video_title || "")
+            .replace("{video_description}", meta.video_description || "")
+            .replace("{hashtags}", meta.hashtags || "")
+            .replace("{channel_name}", meta.channel_name || "");
           const fullPrompt = `System prompt: ${systemPrompt}\n\nTranscript:\n${transcript}`;
 
-          const result = await sendToLLM(transcript);
+          const result = await sendToLLM(transcript, true);
           showOverlay(result.response, fullPrompt);
         }
       }
@@ -584,11 +594,16 @@ function main() {
             }
           }
 
-          // Use prompt from config for display
-          const systemPrompt = extensionConfig.prompts?.initial || "";
+          const meta = getYouTubeMetadata();
+          const systemPromptTemplate = extensionConfig.prompts?.initial || "";
+          const systemPrompt = systemPromptTemplate
+            .replace("{video_title}", meta.video_title || "")
+            .replace("{video_description}", meta.video_description || "")
+            .replace("{hashtags}", meta.hashtags || "")
+            .replace("{channel_name}", meta.channel_name || "");
           const fullPrompt = `System prompt: ${systemPrompt}\n\nTranscript:\n${transcript}`;
 
-          const result = await sendToLLM(transcript);
+          const result = await sendToLLM(transcript, true);
           showOverlay(result.response, fullPrompt);
         }
       }

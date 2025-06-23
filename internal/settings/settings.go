@@ -43,10 +43,11 @@ type Config struct {
 		OverlayBackground     string `yaml:"overlayBackground"`
 	} `yaml:"ui"`
 	Overlay struct {
-		Width            int `yaml:"width"`
-		BorderRadius     int `yaml:"borderRadius"`
-		Padding          int `yaml:"padding"`
-		MaxHeightPercent int `yaml:"maxHeightPercent"`
+		Width              int  `yaml:"width"`
+		BorderRadius       int  `yaml:"borderRadius"`
+		Padding            int  `yaml:"padding"`
+		MaxHeightPercent   int  `yaml:"maxHeightPercent"`
+		ShowInitialMessage bool `yaml:"showInitialMessage"`
 	} `yaml:"overlay"`
 }
 
