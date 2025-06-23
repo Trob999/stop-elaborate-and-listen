@@ -312,6 +312,9 @@ function enableYouTubeCaptions() {
     // Stop after max attempts
     if (++attempts > maxAttempts) {
       clearInterval(interval);
+      if (!document.querySelector('.ytp-caption-segment')) {
+        alert("No captions available for this video.");
+      }
     }
   }, 500);
 }
