@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"stopel/internal/api"
+	"stopel/internal/settings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
@@ -12,6 +13,12 @@ import (
 
 func main() {
 	_ = godotenv.Load()
+
+	// Load config.yaml
+	if err := settings.LoadConfig("config.yaml"); err != nil {
+		log.Fatalf("Failed to load config.yaml: %v", err)
+	}
+
 	r := chi.NewRouter()
 
 	// ✅ Enable CORS

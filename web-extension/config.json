@@ -1,0 +1,46 @@
+{
+  "caption": {
+    "maxSeconds": 20,
+    "maxWords": 30,
+    "pollingIntervalMs": 500
+  },
+  "llm": {
+    "local": {
+      "model": "llama3",
+      "url": "http://localhost:11434/api/generate"
+    },
+    "online": {
+      "apiKey": "",
+      "model": "gpt-4",
+      "url": "https://api.openai.com/v1/chat/completions"
+    },
+    "provider": "local"
+  },
+  "overlay": {
+    "borderRadius": 14,
+    "maxHeightPercent": 80,
+    "padding": 32,
+    "width": 800
+  },
+  "prompts": {
+    "followUp": "You are continuing a helpful, context-aware conversation with the user.",
+    "initial": "You are an AI assistant that provides detailed explanations and summaries based on the provided transcript. Your responses should be informative, concise, and relevant to the content of the transcript."
+  },
+  "shortcuts": {
+    "activateChat": "Ctrl+Shift+Space"
+  },
+  "ui": {
+    "assistantBubbleColor": "#333",
+    "assistantTextColor": "#fff",
+    "fontSize": 18,
+    "overlayBackground": "rgba(0,0,0,0.95)",
+    "sendButtonColor": "#ff69b4",
+    "systemBannerColor": "#1976d2",
+    "systemBannerTextColor": "#fff",
+    "userBubbleColor": "#ff69b4",
+    "userTextColor": "#fff"
+  },
+  "web_extension": {
+    "llm_url": "http://localhost:8080/api/ask"
+  }
+}

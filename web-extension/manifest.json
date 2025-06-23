@@ -13,5 +13,11 @@
   ],
   "action": {
     "default_title": "Stop, Elaborate, and Listen"
-  }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["config.json"],
+      "matches": ["*://www.youtube.com/*"]
+    }
+  ]
 }

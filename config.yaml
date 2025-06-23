@@ -1,0 +1,43 @@
+# if you make changes to this file, run 'go run convert-config.go' to convert it to config.json required by the web-extension.
+
+caption:
+  maxWords: 30
+  maxSeconds: 20
+  pollingIntervalMs: 500   # <--- Added polling interval for captions
+
+prompts:
+  initial: "You are an AI assistant that provides detailed explanations and summaries based on the provided transcript. Your responses should be informative, concise, and relevant to the content of the transcript."
+  followUp: "You are continuing a helpful, context-aware conversation with the user."
+
+shortcuts:
+  activateChat: "Ctrl+Shift+Space"
+
+llm:
+  provider: "local"
+  local:
+    url: "http://localhost:11434/api/generate"   # Used by Go backend
+    model: "llama3"
+  online:
+    url: "https://api.openai.com/v1/chat/completions"
+    apiKey: ""
+    model: "gpt-4"
+
+web_extension:
+  llm_url: "http://localhost:8080/api/ask"       # Used by JS extension
+
+ui:
+  fontSize: 18
+  userBubbleColor: "#ff69b4"         # Pink for user message bubble
+  assistantBubbleColor: "#333"
+  systemBannerColor: "#1976d2"
+  sendButtonColor: "#ff69b4"         # Pink for send button
+  userTextColor: "#fff"
+  assistantTextColor: "#fff"
+  systemBannerTextColor: "#fff"
+  overlayBackground: "rgba(0,0,0,0.95)"
+
+overlay:
+  width: 800
+  borderRadius: 14
+  padding: 32
+  maxHeightPercent: 80

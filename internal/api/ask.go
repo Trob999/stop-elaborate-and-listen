@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"stopel/internal/llm"
+	"stopel/internal/settings"
 )
 
 type AskRequest struct {
@@ -27,7 +28,13 @@ func HandleAsk(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respText, err := llm.AskLLM(req.Transcript, req.SystemPrompt)
+	// Use default prompt from config if not provided
+	systemPrompt := req.SystemPrompt
+	if systemPrompt == "" {
+		systemPrompt = settings.AppConfig.Prompts.Initial
+	}
+
+	respText, err := llm.AskLLM(req.Transcript, systemPrompt)
 	if err != nil {
 		// Log the error
 		log.Printf("LLM error: %v\n", err)

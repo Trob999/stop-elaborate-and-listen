@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"stopel/internal/settings"
 )
 
 type ChatMessage struct {
@@ -29,7 +30,7 @@ func AskLLM(userText, systemPrompt string) (string, error) {
 	fullPrompt := fmt.Sprintf("%s\n\n\"%s\"", systemPrompt, userText)
 
 	reqBody := map[string]interface{}{
-		"model":  "llama3", // or llama3:instruct if you downloaded that version
+		"model":  settings.AppConfig.LLM.Local.Model, // or llama3:instruct if you downloaded that version
 		"prompt": fullPrompt,
 		"stream": false,
 	}
@@ -39,7 +40,7 @@ func AskLLM(userText, systemPrompt string) (string, error) {
 		return "", fmt.Errorf("failed to encode request: %w", err)
 	}
 
-	resp, err := http.Post("http://localhost:11434/api/generate", "application/json", bytes.NewReader(bodyBytes))
+	resp, err := http.Post(settings.AppConfig.LLM.Local.URL, "application/json", bytes.NewReader(bodyBytes))
 	if err != nil {
 		return "", fmt.Errorf("failed to contact Ollama: %w", err)
 	}
