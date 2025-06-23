@@ -9,25 +9,11 @@ A browser extension + local AI backend that lets you double-tap the spacebar on 
 - **Only works with YouTube currently.**  
   **Solution:** Add functionality for other sites manually, or fallback on real-time audio transcription (e.g. [Whisper](https://github.com/openai/whisper)).
 
-- **Captions are not enabled by default.**  
-  **Solution:** Auto-enable captions every time a YouTube page loads.
-
 - **Some videos have closed captions fully disabled.**  
   **Solution:** Fallback to real-time transcription (e.g. Whisper).
 
-- **Recent captions may not be captured before processing.**  
-  **Solution:** Verify if this exists; if so, add a small delay to ensure all captions up to pause time are captured.
-
-- **Double-tap spacebar interferes with YouTube’s default pause/play.**  
-  **Solution:**  
-  1. Single space = pause.  
-  2. Double space (within timeout) = open **Stop, Elaborate, and Listen** overlay (no restart).
-
-- **This is mostly AI slop at the moment.**  
-  **Solution:** Manual cleanup—remove unused files, optimise code.
-
 - **Stateless LLMs can’t remember previous context.**  
-  - *Current (ugly) solution:* resend full transcript each question.  
+  - *Current solution:* The extension resends the full transcript and conversation history for each question.
   - *Proposed redesign:*  
     - **Extension**: capture messages & captions → send to memory service  
     - **Memory Service** (Go/Python):  
@@ -51,6 +37,22 @@ A browser extension + local AI backend that lets you double-tap the spacebar on 
 
 - **YouTube captions are sometimes inaccurate.**  
   **Solution:** On initial page load, send video title, description, categories (e.g. `#tech #tutorial`) plus a brief “clean-up” prompt to the LLM; store for later.
+
+---
+
+### ✅ Fixed items
+
+- **Captions are not enabled by default.**  
+  *Fixed:* The extension now auto-enables captions every time a YouTube page loads.
+
+- **Recent captions may not be captured before processing.**  
+  *Fixed:* The extension polls for recent captions before sending to the LLM, ensuring up-to-date context.
+
+- **Double-tap spacebar interferes with YouTube’s default pause/play.**  
+  *Fixed:* Single space = pause; double space (within timeout) = open overlay without restarting video.
+
+- **Manual cleanup and code optimization.**  
+  *Fixed:* Unused files removed and code optimized.
 
 ---
 
